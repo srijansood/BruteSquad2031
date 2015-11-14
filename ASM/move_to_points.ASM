@@ -104,10 +104,20 @@ Main: ; "Real" program starts here.
 		CALL ROTATE_TO_FACE
 		CALL MOVE
 		
+		ILOAD TABLE_POINTER ; load original destination number
+		CALL IndicateDest          ; send original destination number to computer log
+		
+		LOAD TABLE_POINTER
+		ADDI 1
+		STORE TABLE_POINTER
+		
+		;LOAD 4
+		;OUT BEEP
+		
 		LOAD POINTER_ADD_AMT	;used to keep track of how many points we have loaded out of table so we know when to stop the loop and die
-		ADDI 2
+		ADDI 3
 		STORE POINTER_ADD_AMT
-		ADDI -24
+		ADDI -36
 	JNEG MOVEMENT_LOOP
 	
 	CALL Die
@@ -115,31 +125,43 @@ Main: ; "Real" program starts here.
 	
 	TABLE_POINTER: DW 0
 	POINTER_ADD_AMT: DW 0
-	COORDINATE_TABLE:
+	COORDINATE_TABLE: ; PREPROCESSING WILL POPULATE THIS TABLE with cooordinates and their original corresponding destination number
 		DW -200 ;first coordinate x
 		DW 300  ;first coordinate y
+		DW 12    ; number of original destination at this coordinate (we will be given destinations 1-12 and they will likely end up out of order in the robot)
 		DW 100 ; second coordinate x
 		DW 100 ; second coordinate y
+		DW 11   ; # of original destination
 		DW -200 ;coord 2 x
 		DW 300  ;coord 2 y
+		DW 10  ; # of original destination
 		DW 100 ; coord 3 x
 		DW 100 ; coord 3 y
+		DW 8   ; # of original destination
 		DW -200 ; coord 4 x
 		DW 300  ;coord 4 y
+		DW 6     ; # of original destination
 		DW 100 ; coord 5 x
 		DW 100 ; coord 5 y
+		DW 5     ; # of original destination
 		DW -200 ;coord 6 x
 		DW 300  ;coord 6 y
+		DW 9     ; # of original destination
 		DW 100 ; coord 7 x
 		DW 100 ; coord 7 y
+		DW 7    ; # of original destination
 		DW -200 ;coord 8 x
 		DW 300  ;coord 8 y
+		DW 4    ; # of original destination
 		DW 100 ; coord 9 x
 		DW 100 ; coord 9 y
+		DW 3    ; #  of original destination
 		DW -200 ; coord 10 x
 		DW 300  ;coord 10 y
+		DW 2    ; # of original destination
 		DW 100 ; coord 11 x
 		DW 100 ; coord 11 y
+		DW 1   ; # of original destination
 	
 Die:
 ; Sometimes it's useful to permanently stop execution.
@@ -188,6 +210,9 @@ MOVE:
 		ADDI -4 ;see if current angle is >= 4 degrees off
 		JNEG AFTER_ROTATION_ADJUSTMENT
 			; if (angle error is too great, make a rotation to adjust before continuing movement
+			LOAD Zero
+			OUT LVELCMD
+			OUT RVELCMD
 			CALL ROTATE_TO_FACE
 		
 		AFTER_ROTATION_ADJUSTMENT:
@@ -216,7 +241,7 @@ MOVE:
 				CALL L2Estimate
 				STORE DISTANCE_TO_MOVE
 				OUT SSEG1
-				ADDI -140 ;see if distance is within 100 of zero
+				ADDI -140 ;see if distance is within 140 of zero
 	JPOS MOVE_LOOP
 	
 	LOAD Zero
