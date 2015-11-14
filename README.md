@@ -8,3 +8,6 @@ Given a set of destination coordinates, how can the DE2Bot visit as many as poss
 
 TO-DO:
 - Add compiled bianries to gitignore
+
+- have preprocessing program convert take in 12 (x,y) integer coordinates in feet and convert them to robot units and place them in mif file
+	* robot units = inches * 25.4 / 1.05
