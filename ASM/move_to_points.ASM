@@ -99,8 +99,33 @@ Main: ; "Real" program starts here.
 		;JNEG MAIN_ROTATE_LOOP ;keep rotating and moving if not close nough
 	
 	
+	CALL Die
 	
-	
+	COORDINATE_TABLE:
+		DW -200 ;first coordinate x
+		DW 300  ;first coordinate y
+		DW 100 ; second coordinate x
+		DW 100 ; second coordinate y
+		DW -200 ;coord 2 x
+		DW 300  ;coord 2 y
+		DW 100 ; coord 3 x
+		DW 100 ; coord 3 y
+		DW -200 ; coord 4 x
+		DW 300  ;coord 4 y
+		DW 100 ; coord 5 x
+		DW 100 ; coord 5 y
+		DW -200 ;coord 6 x
+		DW 300  ;coord 6 y
+		DW 100 ; coord 7 x
+		DW 100 ; coord 7 y
+		DW -200 ;coord 8 x
+		DW 300  ;coord 8 y
+		DW 100 ; coord 9 x
+		DW 100 ; coord 9 y
+		DW -200 ; coord 10 x
+		DW 300  ;coord 10 y
+		DW 100 ; coord 11 x
+		DW 100 ; coord 11 y
 	
 Die:
 ; Sometimes it's useful to permanently stop execution.
