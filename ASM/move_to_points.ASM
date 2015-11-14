@@ -181,7 +181,7 @@ MOVE:
 	LOAD Zero
 	OUT LVELCMD
 	OUT RVELCMD
-	RETURN	
+RETURN	
 	
 	
 	
@@ -204,16 +204,14 @@ DISTANCE_TO_MOVE: DW &H0000
 ROTATE_TO_FACE:
 
 	
-	
-	
-	
 	LOAD FORWARD ;default direciton to move after rotating
 	STORE DIRECTION_TO_MOVE_AFTER_ROTATING
 	
+	CALL SETUP_CALC_ERROR
+	CALL CALC_ERROR
 	;******************************************************************************
 	;   now the sign of the value in the accumulator tells us which way to rotate if we want to move forwards towards the target after rotating
 	;******************************************************************************
-	CALL CALC_ERROR
 	STORE ERROR  ;save result for later so we know which direction to rotate
 	CALL Abs	; Abs(error between current angle and desired angle)
 	ADDI -90
@@ -312,12 +310,13 @@ SETUP_CALC_ERROR:
 	
 	; get desired angle
 		; store params for ATAN
-		LOAD X_DIFF
-		STORE AtanX
-		LOAD Y_DIFF
-		STORE AtanY
-		CALL Atan2
+	LOAD X_DIFF
+	STORE AtanX
+	LOAD Y_DIFF
+	STORE AtanY
+	CALL Atan2
 	STORE DESIRED_ANGLE; store desired angle
+RETURN
 
 ;**********************************************************************
 ; CALC_ERROR(DESIRED_ANGLE, THETA_STORAGE): signed error in AC
