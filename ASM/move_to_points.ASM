@@ -81,26 +81,40 @@ Main: ; "Real" program starts here.
 	CALL   UARTClear   ; empty the UART receive FIFO of any old data
 	CALL	StartLog
 
+	LOADI COORDINATE_TABLE ;load  AC with address of the COORDINATE_TABLE
+	STORE TABLE_POINTER      ; now the address of the COORDINATE_TABLE is stored in a mem address
 	
-	;calling ROTATE_TO_FACE
-	LOAD Zero
-	ADDI -200
-	STORE ROTATE_DESIRED_X
 	
-	LOAD Zero
-	ADDI 300
-	STORE ROTATE_DESIRED_Y
-	
-	;MAIN_ROTATE_LOOP:
+	MOVEMENT_LOOP:
+		ILOAD TABLE_POINTER	;load the index of the COORDINATE_TABLE pointed to by the TABLE_POINTER
+		STORE ROTATE_DESIRED_X  ;load and store x of goal coordinate
+		
+		LOAD TABLE_POINTER ;increment TABLE_POINTER
+		ADDI 1
+		STORE TABLE_POINTER 
+		
+		ILOAD TABLE_POINTER
+		STORE ROTATE_DESIRED_Y ;load and store y of goal coordinate
+		
+		LOAD TABLE_POINTER
+		ADDI 1
+		STORE TABLE_POINTER
+		
+		;do the rotation / movement to the next ggoal coordinate:  (ROTATE_DESIRED_X, ROTATE_DESIRED_Y)
 		CALL ROTATE_TO_FACE
 		CALL MOVE
-		;LOAD DISTANCE_TO_MOVE
-		;ADDI -100
-		;JNEG MAIN_ROTATE_LOOP ;keep rotating and moving if not close nough
-	
+		
+		LOAD POINTER_ADD_AMT	;used to keep track of how many points we have loaded out of table so we know when to stop the loop and die
+		ADDI 2
+		STORE POINTER_ADD_AMT
+		ADDI -24
+	JNEG MOVEMENT_LOOP
 	
 	CALL Die
 	
+	
+	TABLE_POINTER: DW 0
+	POINTER_ADD_AMT: DW 0
 	COORDINATE_TABLE:
 		DW -200 ;first coordinate x
 		DW 300  ;first coordinate y
