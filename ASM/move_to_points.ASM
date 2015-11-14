@@ -79,7 +79,7 @@ Main: ; "Real" program starts here.
 	; You will probably want to reset the position at the start your project code:
 	OUT    RESETPOS    ; reset odometer in case wheels moved after programming
 	CALL   UARTClear   ; empty the UART receive FIFO of any old data
-	
+	CALL	StartLog
 
 	
 	;calling ROTATE_TO_FACE
@@ -106,6 +106,7 @@ Die:
 ; Sometimes it's useful to permanently stop execution.
 ; This will also catch the execution if it accidentally
 ; falls through from above.
+	CALL   StopLog     ; Disable position logging
 	LOAD   Zero        ; Stop everything.
 	OUT    LVELCMD
 	OUT    RVELCMD
@@ -126,16 +127,7 @@ Die:
 	CALL L2Estimate
 	OUT SSEG1
 	JUMP LOOP_FOREVER
-	
-	
-	
-	
-	
-	
-	
-	
-	;OUT    SSEG2
-	CALL   StopLog     ; Disable position logging
+
 Forever:
 	JUMP   Forever     ; Do this forever.
 DEAD:      DW &HDEAD   ; Example of a "local variable"
@@ -156,7 +148,7 @@ MOVE:
 		CALL ABS
 		ADDI -4 ;see if current angle is >= 4 degrees off
 		JNEG AFTER_ROTATION_ADJUSTMENT
-		; if (angle error is too great, make a rotation to adjust before continuing movement
+			; if (angle error is too great, make a rotation to adjust before continuing movement
 			CALL ROTATE_TO_FACE
 		
 		AFTER_ROTATION_ADJUSTMENT:
