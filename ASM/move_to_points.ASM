@@ -150,32 +150,42 @@ MOVE:
 	; - Call L2Estimate
 	
 	MOVE_LOOP:
-		;determine which direction to move
-		;forward is positive, backward is negative
-		LOAD DIRECTION_TO_MOVE_AFTER_ROTATING
-		JNEG MOVE_BACKWARD
-			;move forward
-			LOAD FSlow
-			OUT LVELCMD
-			OUT RVELCMD
-			JUMP END_OF_MOVEMENT_CASES
-		MOVE_BACKWARD:
-			LOAD RSlow
-			OUT LVELCMD
-			OUT RVELCMD
-		END_OF_MOVEMENT_CASES:
-			IN XPOS
-			SUB ROTATE_DESIRED_X
-			STORE L2X
-			
-			IN YPOS
-			SUB ROTATE_DESIRED_Y
-			STORE L2Y
-			
-			CALL L2Estimate
-			STORE DISTANCE_TO_MOVE
-			OUT SSEG1
-			ADDI -100 ;see if distance is within 100 of zero
+		;rotate if error is too great
+		CALL SETUP_CALC_ERROR
+		CALL CALC_ERROR
+		CALL ABS
+		ADDI -4 ;see if current angle is >= 4 degrees off
+		JNEG AFTER_ROTATION_ADJUSTMENT
+		; if (angle error is too great, make a rotation to adjust before continuing movement
+			CALL ROTATE_TO_FACE
+		
+		AFTER_ROTATION_ADJUSTMENT:
+			;determine which direction to move
+			;forward is positive, backward is negative
+			LOAD DIRECTION_TO_MOVE_AFTER_ROTATING
+			JNEG MOVE_BACKWARD
+				;move forward
+				LOAD FSlow
+				OUT LVELCMD
+				OUT RVELCMD
+				JUMP END_OF_MOVEMENT_CASES
+			MOVE_BACKWARD:
+				LOAD RSlow
+				OUT LVELCMD
+				OUT RVELCMD
+			END_OF_MOVEMENT_CASES:
+				IN XPOS
+				SUB ROTATE_DESIRED_X
+				STORE L2X
+				
+				IN YPOS
+				SUB ROTATE_DESIRED_Y
+				STORE L2Y
+				
+				CALL L2Estimate
+				STORE DISTANCE_TO_MOVE
+				OUT SSEG1
+				ADDI -140 ;see if distance is within 100 of zero
 	JPOS MOVE_LOOP
 	
 	LOAD Zero
