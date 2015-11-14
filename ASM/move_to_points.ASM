@@ -84,6 +84,8 @@ Main: ; "Real" program starts here.
 	LOADI COORDINATE_TABLE ;load  AC with address of the COORDINATE_TABLE
 	STORE TABLE_POINTER      ; now the address of the COORDINATE_TABLE is stored in a mem address
 	
+	LOAD Zero ;reset table pointer
+	STORE POINTER_ADD_AMT
 	
 	MOVEMENT_LOOP:
 		ILOAD TABLE_POINTER	;load the index of the COORDINATE_TABLE pointed to by the TABLE_POINTER
@@ -101,12 +103,27 @@ Main: ; "Real" program starts here.
 		STORE TABLE_POINTER
 		
 		;do the rotation / movement to the next ggoal coordinate:  (ROTATE_DESIRED_X, ROTATE_DESIRED_Y)
+		LOAD BEFORE
+		OUT SSEG1
+		
+		;setup rotate speed for initial rotation
+		LOAD FSlow
+		STORE F_ROTATE_SPEED
+		LOAD RSlow
+		STORE R_ROTATE_SPEED
+		LOAD Zero
+		ADDI 35
+		STORE ROTATE_THRESHOLD
 		CALL ROTATE_TO_FACE
+		
 		CALL MOVE
+		
+		LOAD AFTER
+		OUT SSEG1
 		
 		ILOAD TABLE_POINTER ; load original destination number
 		CALL IndicateDest          ; send original destination number to computer log
-		
+		OUT SSEG2
 		LOAD TABLE_POINTER
 		ADDI 1
 		STORE TABLE_POINTER
@@ -122,45 +139,47 @@ Main: ; "Real" program starts here.
 	
 	CALL Die
 	
+	BEFORE: DW &H1010
+	AFTER: DW &H1111
 	
 	TABLE_POINTER: DW 0
 	POINTER_ADD_AMT: DW 0
 	COORDINATE_TABLE: ; PREPROCESSING WILL POPULATE THIS TABLE with cooordinates and their original corresponding destination number
-		DW -200 ;first coordinate x
-		DW 300  ;first coordinate y
+		DW 200 ;first coordinate x
+		DW 200  ;first coordinate y
 		DW 12    ; number of original destination at this coordinate (we will be given destinations 1-12 and they will likely end up out of order in the robot)
-		DW 100 ; second coordinate x
-		DW 100 ; second coordinate y
+		DW -200 ; second coordinate x
+		DW 200 ; second coordinate y
 		DW 11   ; # of original destination
 		DW -200 ;coord 2 x
-		DW 300  ;coord 2 y
+		DW -200  ;coord 2 y
 		DW 10  ; # of original destination
-		DW 100 ; coord 3 x
-		DW 100 ; coord 3 y
+		DW 200 ; coord 3 x
+		DW -200 ; coord 3 y
 		DW 8   ; # of original destination
-		DW -200 ; coord 4 x
+		DW 300 ; coord 4 x
 		DW 300  ;coord 4 y
 		DW 6     ; # of original destination
-		DW 100 ; coord 5 x
-		DW 100 ; coord 5 y
+		DW -400 ; coord 5 x
+		DW -400 ; coord 5 y
 		DW 5     ; # of original destination
-		DW -200 ;coord 6 x
-		DW 300  ;coord 6 y
+		DW -500 ;coord 6 x
+		DW 400 ;coord 6 y
 		DW 9     ; # of original destination
-		DW 100 ; coord 7 x
-		DW 100 ; coord 7 y
+		DW 200 ; coord 7 x
+		DW 300 ; coord 7 y
 		DW 7    ; # of original destination
-		DW -200 ;coord 8 x
-		DW 300  ;coord 8 y
+		DW 800 ;coord 8 x
+		DW -500  ;coord 8 y
 		DW 4    ; # of original destination
-		DW 100 ; coord 9 x
-		DW 100 ; coord 9 y
+		DW 200 ; coord 9 x
+		DW 400 ; coord 9 y
 		DW 3    ; #  of original destination
-		DW -200 ; coord 10 x
-		DW 300  ;coord 10 y
+		DW 350 ; coord 10 x
+		DW -300  ;coord 10 y
 		DW 2    ; # of original destination
-		DW 100 ; coord 11 x
-		DW 100 ; coord 11 y
+		DW -300 ; coord 11 x
+		DW 800 ; coord 11 y
 		DW 1   ; # of original destination
 	
 Die:
@@ -207,12 +226,19 @@ MOVE:
 		CALL SETUP_CALC_ERROR
 		CALL CALC_ERROR
 		CALL ABS
-		ADDI -4 ;see if current angle is >= 4 degrees off
+		ADDI -10 ;see if current angle is >= -10 degrees off
 		JNEG AFTER_ROTATION_ADJUSTMENT
 			; if (angle error is too great, make a rotation to adjust before continuing movement
 			LOAD Zero
 			OUT LVELCMD
 			OUT RVELCMD
+			LOAD FSlow
+			STORE F_ROTATE_SPEED
+			LOAD RSlow
+			STORE R_ROTATE_SPEED
+			LOAD Zero
+			ADDI 80
+			STORE ROTATE_THRESHOLD
 			CALL ROTATE_TO_FACE
 		
 		AFTER_ROTATION_ADJUSTMENT:
@@ -221,12 +247,12 @@ MOVE:
 			LOAD DIRECTION_TO_MOVE_AFTER_ROTATING
 			JNEG MOVE_BACKWARD
 				;move forward
-				LOAD FSlow
+				LOAD FMid
 				OUT LVELCMD
 				OUT RVELCMD
 				JUMP END_OF_MOVEMENT_CASES
 			MOVE_BACKWARD:
-				LOAD RSlow
+				LOAD RMid
 				OUT LVELCMD
 				OUT RVELCMD
 			END_OF_MOVEMENT_CASES:
@@ -241,7 +267,7 @@ MOVE:
 				CALL L2Estimate
 				STORE DISTANCE_TO_MOVE
 				OUT SSEG1
-				ADDI -140 ;see if distance is within 140 of zero
+				ADDI -140 ;see if distance is within 140 of zero (140 ~= 6 inches)
 	JPOS MOVE_LOOP
 	
 	LOAD Zero
@@ -258,31 +284,57 @@ DISTANCE_TO_MOVE: DW &H0000
 
 	
 	
-	
-	
-	
-	
 
+TEST_VAL: DW &H0011
+	
+ROTATE_DIRECTION: DW &H0000
+RIGHT: DW -1
+LEFT: DW 1
+RMidLow: DW -200
+FMidLow: DW 200
+
+F_ROTATE_SPEED: DW &H0000 ; speed of the wheel whichi s spinning forward while rotating
+R_ROTATE_SPEED: DW &H0000 ; speed of thew heelw hich is spinning back while rotating
+ROTATE_THRESHOLD: DW &H0000
 ;*************************************************************************
-;        ROTATE_TO_FACE(x, y): DIRECTION_TO_MOVE_AFTER_ROTATING
+;        ROTATE_TO_FACE(x, y, speed, threshold): DIRECTION_TO_MOVE_AFTER_ROTATING
 ;   rotates to face a point and also tells which direction to move after the rotation is done
+;   speed: the speeda t which to rotate
+;   threshold: how far from goal angle stop rotating
 ;**************************************************************************
 ROTATE_TO_FACE:
-
+	LOAD Zero ;debug
+	OUT SSEG2
 	
 	LOAD FORWARD ;default direciton to move after rotating
 	STORE DIRECTION_TO_MOVE_AFTER_ROTATING
 	
 	CALL SETUP_CALC_ERROR
 	CALL CALC_ERROR
+	STORE ERROR  ;save result for later so we know which direction to rotate
 	;******************************************************************************
 	;   now the sign of the value in the accumulator tells us which way to rotate if we want to move forwards towards the target after rotating
 	;******************************************************************************
-	STORE ERROR  ;save result for later so we know which direction to rotate
+	JNEG RIGHT_ROTATE
+		LOAD LEFT
+		JUMP ROTATE_STORE_0
+	RIGHT_ROTATE:
+		LOAD RIGHT
+	ROTATE_STORE_0: 
+		STORE ROTATE_DIRECTION
+	
+	LOAD ERROR
 	CALL Abs	; Abs(error between current angle and desired angle)
 	ADDI -90
 	JNEG ROTATE_LOOP ; if ABS(error) < 90, we will go forward after rotating ELSE, go we going backwards
-		
+		LOAD ERROR
+		JNEG LEFT_ROTATE
+			LOAD RIGHT
+			JUMP ROTATE_STORE_1
+		LEFT_ROTATE:
+			LOAD LEFT
+		ROTATE_STORE_1: 
+			STORE ROTATE_DIRECTION
 		;*********************** FLIP DA DESIRED ANGLE WE GONA GO BACKWARDS after rotating
 		LOAD BACKWARD ;so we know which way to move towards target after rotating
 		STORE DIRECTION_TO_MOVE_AFTER_ROTATING
@@ -303,31 +355,35 @@ ROTATE_TO_FACE:
 		
 		END_OF_ANGLE_FLIPPING: 
 			STORE DESIRED_ANGLE ;update desired angle with flipped version since we are going backwards now
-			CALL CALC_ERROR ; calculate new error, since we will have to rotate a different amount than if we were going forwards
-			STORE ERROR   ; store error to be used as a parameter for rotateTo
+			;CALL CALC_ERROR ; calculate new error, since we will have to rotate a different amount than if we were going forwards
+			;STORE ERROR   ; store error to be used as a parameter for rotateTo
 			
 	
 	ROTATE_LOOP:  ;now rotate to desired angle
-		LOAD ERROR ;rotate right if error is negative, left if error is positive
+		;LOAD ERROR ;rotate right if error is negative, left if error is positive
+		LOAD ROTATE_DIRECTION
 		JNEG NEG_ROTATE_CASE
 		; POSITIVE CASE ---- ROTATE LEFT
-			LOAD FSlow
+			LOAD F_ROTATE_SPEED
 			OUT RVELCMD
-			LOAD RSlow
+			LOAD R_ROTATE_SPEED
 			OUT LVELCMD
 			JUMP ROTATE_MIDDLE
 		NEG_ROTATE_CASE:
-			LOAD FSlow
+			LOAD F_ROTATE_SPEED
 			OUT LVELCMD
-			LOAD RSlow
+			LOAD R_ROTATE_SPEED
 			OUT RVELCMD
 		
-		ROTATE_MIDDLE:
+		ROTATE_MIDDLE: ; the part where we decide if we should stop
 			IN THETA
 			SUB DESIRED_ANGLE
+			;STORE ROTATE_ERROR
+			
+			;LOAD ROTATE_DIRECTION ;negative = right, positive = right
 			CALL Abs
-			ADDI -5
-			JNEG END_OF_ROTATION  ; if abs(current angle - desired angle) < 5, stop rotating
+			SUB ROTATE_THRESHOLD
+			JNEG END_OF_ROTATION  ; if abs(current angle - desired angle) < some amt, stop rotating (robot will continue to spin under its rotational momentum
 			JUMP ROTATE_LOOP
 	
 	END_OF_ROTATION:
@@ -335,6 +391,8 @@ ROTATE_TO_FACE:
 		OUT LVELCMD
 		OUT RVELCMD
 		RETURN
+
+ROTATE_ERROR: DW &H0000
 
 ;*******************************************************************************
 ; Mod360: modulo 360
@@ -345,11 +403,11 @@ Mod360:
 	JNEG   Mod360n      ; handle negatives
 Mod360p:
 	ADDI   -360
-	JPOS   Mod360p      ; subtract 180 until negative
+	JPOS   Mod360p      ; subtract 360 until negative
 	ADDI   360          ; go back positive
 	RETURN
 Mod360n:
-	ADDI   360          ; add 180 until positive
+	ADDI   360          ; add 360 until positive
 	JNEG   Mod360n
 	ADDI   -360         ; go back negative
 	RETURN
@@ -381,7 +439,7 @@ SETUP_CALC_ERROR:
 	LOAD Y_DIFF
 	STORE AtanY
 	CALL Atan2
-	STORE DESIRED_ANGLE; store desired angle
+	STORE DESIRED_ANGLE ;store desired angle
 RETURN
 
 ;**********************************************************************
@@ -396,7 +454,7 @@ CALC_ERROR:
 	ADDI 180                        ;desired - actual + 180
 	CALL Mod360                  ; (desired - actual + 180)%360
 	ADDI -180							;(desired -actual + 180)%360 - 180
-	RETURN
+RETURN
 
 DESIRED_ANGLE:	DW	&H0000
 THETA_STORAGE:   DW   &H0000
