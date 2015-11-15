@@ -216,7 +216,9 @@ DEAD:      DW &HDEAD   ; Example of a "local variable"
 	
 	
 	
-	
+;********
+; MOVE - move in a direction, making small adjustments if necessary
+;*************************************
 MOVE:
 	; - Store X and Y offset in L2X and L2Y.
 	; - Call L2Estimate
@@ -226,7 +228,7 @@ MOVE:
 		CALL SETUP_CALC_ERROR
 		CALL CALC_ERROR
 		CALL ABS
-		ADDI -10 ;see if current angle is >= -10 degrees off
+		ADDI -35 ;see if current angle is >= -35 degrees off
 		JNEG AFTER_ROTATION_ADJUSTMENT
 			; if (angle error is too great, make a rotation to adjust before continuing movement
 			LOAD Zero
@@ -237,7 +239,7 @@ MOVE:
 			LOAD RSlow
 			STORE R_ROTATE_SPEED
 			LOAD Zero
-			ADDI 80
+			ADDI 25
 			STORE ROTATE_THRESHOLD
 			CALL ROTATE_TO_FACE
 		
