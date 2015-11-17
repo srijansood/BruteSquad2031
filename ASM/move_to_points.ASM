@@ -112,7 +112,7 @@ Main: ; "Real" program starts here.
 		LOAD RSlow
 		STORE R_ROTATE_SPEED
 		LOAD Zero
-		ADDI 35
+		ADDI 45
 		STORE ROTATE_THRESHOLD
 		CALL ROTATE_TO_FACE
 		
@@ -222,12 +222,36 @@ DEAD:      DW &HDEAD   ; Example of a "local variable"
 MOVE:
 	; - Store X and Y offset in L2X and L2Y.
 	; - Call L2Estimate
-	
+	LOAD TEST_VAL
+	OUT SSEG2
 	MOVE_LOOP:
-		;rotate if error is too great
 		CALL SETUP_CALC_ERROR
+		LOAD DIRECTION_TO_MOVE_AFTER_ROTATING
+		JPOS SKIP_FLIP
+			;flip angle b/c moving backwards
+			CALL FLIP_ANGLE
+			STORE DESIRED_ANGLE
+		SKIP_FLIP:
 		CALL CALC_ERROR
 		STORE ERROR
+		CALL ABS
+		ADDI -80 ;see if current angle is >= -35 degrees off
+		JNEG AFTER_ROTATION_ADJUSTMENT
+		;rotate if error is too great	
+			; if (angle error is too great, make an in-place rotation to adjust before continuing movement
+			LOAD Zero
+			OUT LVELCMD
+			OUT RVELCMD
+			LOAD FSlow
+			STORE F_ROTATE_SPEED
+			LOAD RSlow
+			STORE R_ROTATE_SPEED
+			LOAD Zero
+			ADDI 45
+			STORE ROTATE_THRESHOLD
+			CALL ROTATE_TO_FACE
+		
+		AFTER_ROTATION_ADJUSTMENT:
 			;determine which direction to move
 			;forward is positive, backward is negative
 		LOAD DIRECTION_TO_MOVE_AFTER_ROTATING
@@ -236,34 +260,34 @@ MOVE:
 			LOAD ERROR ;negative = rotate right, positive = rotate left
 			JNEG F_SLIGHT_RIGHT
 			    ;slight rotation to left
-				LOAD FMid
+				LOAD FSlow
 				OUT LVELCMD
-				ADDI 70
+				ADDI 150
 				OUT RVELCMD
 				JUMP END_OF_MOVEMENT_CASES
 			F_SLIGHT_RIGHT:
 				; slight rotation to right
-				LOAD FMid
+				LOAD FSlow
 				OUT RVELCMD
-				ADDI 70
+				ADDI 150
 				OUT LVELCMD
 			JUMP END_OF_MOVEMENT_CASES
 			
 			
 		MOVE_BACKWARD:
 			LOAD ERROR ;negative = rotate left, positive = rotate right
-			JPOS B_SLIGHT_RIGHT
+			JNEG B_SLIGHT_RIGHT
 			    ;slight rotation to left
-				LOAD RMid
+				LOAD RSlow
 				OUT RVELCMD
-				ADDI -70
+				ADDI -150
 				OUT LVELCMD
 				JUMP END_OF_MOVEMENT_CASES
 			B_SLIGHT_RIGHT:
 				; slight rotation to right
-				LOAD RMid
+				LOAD RSlow
 				OUT LVELCMD
-				ADDI -70
+				ADDI -150
 				OUT RVELCMD
 				
 			JUMP END_OF_MOVEMENT_CASES
@@ -353,20 +377,7 @@ ROTATE_TO_FACE:
 		STORE DIRECTION_TO_MOVE_AFTER_ROTATING
 		
 		
-		LOAD DESIRED_ANGLE ; else, flip the desired angle, flip the direction
-		ADDI -180 ; if desired_angle is in first or second quadrant (0 - 179 degrees)
-		JNEG FIRST2QUADRANTS
-		; else, desired_angle is in 2nd
-			; flip case for second two quadrants
-			LOAD DESIRED_ANGLE
-			ADDI -180
-			JUMP END_OF_ANGLE_FLIPPING
-			
-		FIRST2QUADRANTS:
-			LOAD DESIRED_ANGLE
-			ADDI 180
-		
-		END_OF_ANGLE_FLIPPING: 
+		CALL FLIP_ANGLE
 			STORE DESIRED_ANGLE ;update desired angle with flipped version since we are going backwards now
 			;CALL CALC_ERROR ; calculate new error, since we will have to rotate a different amount than if we were going forwards
 			;STORE ERROR   ; store error to be used as a parameter for rotateTo
@@ -407,6 +418,24 @@ ROTATE_TO_FACE:
 
 ROTATE_ERROR: DW &H0000
 
+;****************************************
+;   FLIP ANGLE
+;****************************************
+FLIP_ANGLE:
+	LOAD DESIRED_ANGLE ; else, flip the desired angle, flip the direction
+		ADDI -180 ; if desired_angle is in first or second quadrant (0 - 179 degrees)
+		JNEG FIRST2QUADRANTS
+		; else, desired_angle is in 2nd
+			; flip case for second two quadrants
+			LOAD DESIRED_ANGLE
+			ADDI -180
+			JUMP END_OF_ANGLE_FLIPPING
+			
+		FIRST2QUADRANTS:
+			LOAD DESIRED_ANGLE
+			ADDI 180
+		
+		END_OF_ANGLE_FLIPPING: RETURN
 ;*******************************************************************************
 ; Mod360: modulo 360
 ; Returns AC%180 in AC
@@ -427,11 +456,9 @@ Mod360n:
 
 ;*************************************************************************
 ; SETUP_CALC_ERROR
-; calculates desired angle (DESIRED_ANGLE)
+; calculates desired angle (modifies DESIRED_ANGLE)
 ;*************************************************************************
 SETUP_CALC_ERROR:
-	IN THETA ;get current robot angle and store it for CALC_ERROR
-	STORE THETA_STORAGE
 	IN XPOS ; find delta x
 	STORE X_POS_STORED
 	;SUB ROTATE_DESIRED_X
@@ -462,6 +489,8 @@ RETURN
 ; **********************************************************************
 	
 CALC_ERROR:
+	IN THETA ;get current robot angle and store it for CALC_ERROR
+	STORE THETA_STORAGE
 	LOAD DESIRED_ANGLE
 	SUB THETA_STORAGE ;desired - actual
 	ADDI 180                        ;desired - actual + 180
