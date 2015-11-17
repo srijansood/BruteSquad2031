@@ -235,7 +235,7 @@ MOVE:
 		CALL CALC_ERROR
 		STORE ERROR
 		CALL ABS
-		ADDI -80 ;see if current angle is >= -35 degrees off
+		ADDI -80 ;see if current angle is >= -80 degrees off
 		JNEG AFTER_ROTATION_ADJUSTMENT
 		;rotate if error is too great	
 			; if (angle error is too great, make an in-place rotation to adjust before continuing movement
