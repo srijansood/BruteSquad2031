@@ -264,14 +264,14 @@ MOVE:
 			LOAD ERROR ;negative = rotate right, positive = rotate left
 			JNEG F_SLIGHT_RIGHT
 			    ;slight rotation to left
-				LOAD FSlow
+				LOAD FMidLow
 				OUT LVELCMD
 				ADDI 150
 				OUT RVELCMD
 				JUMP END_OF_MOVEMENT_CASES
 			F_SLIGHT_RIGHT:
 				; slight rotation to right
-				LOAD FSlow
+				LOAD FMidLow
 				OUT RVELCMD
 				ADDI 150
 				OUT LVELCMD
@@ -282,14 +282,14 @@ MOVE:
 			LOAD ERROR ;negative = rotate left, positive = rotate right
 			JNEG B_SLIGHT_RIGHT
 			    ;slight rotation to left
-				LOAD RSlow
+				LOAD RMidLow
 				OUT RVELCMD
 				ADDI -150
 				OUT LVELCMD
 				JUMP END_OF_MOVEMENT_CASES
 			B_SLIGHT_RIGHT:
 				; slight rotation to right
-				LOAD RSlow
+				LOAD RMidLow
 				OUT LVELCMD
 				ADDI -150
 				OUT RVELCMD
@@ -308,7 +308,7 @@ MOVE:
 			CALL L2Estimate
 			STORE DISTANCE_TO_MOVE
 			OUT SSEG1
-			ADDI -130 ;see if distance is within 130 of zero (130 < 6 inches)
+			ADDI -85 ;see if distance is within # of zero (# < 6 inches)
 	JPOS MOVE_LOOP
 	
 	LOAD Zero
@@ -331,8 +331,8 @@ TEST_VAL: DW &H0011
 ROTATE_DIRECTION: DW &H0000
 RIGHT: DW -1
 LEFT: DW 1
-RMidLow: DW -200
-FMidLow: DW 200
+RMidLow: DW -250
+FMidLow: DW 250
 
 F_ROTATE_SPEED: DW &H0000 ; speed of the wheel whichi s spinning forward while rotating
 R_ROTATE_SPEED: DW &H0000 ; speed of thew heelw hich is spinning back while rotating
