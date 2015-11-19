@@ -8,8 +8,8 @@ Given a set of destination coordinates, how can the DE2Bot visit as many as poss
 
 TO-DO:
 - Add compiled bianries to gitignore
-
-- have preprocessing program convert take in 12 (x,y) integer coordinates in feet and convert them to robot units and place them in mif file
-	* robot units = inches * 25.4 / 1.05
+- Add pre-processing algorithm -> Current approach is Nearest Neighbor
+- Port makefile for Windows
 	
-Note - To compile and run pre-processing code use Makefile (_make_) or  _javac -cp *:. *.java_ (to add JARs to classpath) 
+Note - To compile and run pre-processing code use Makefile
+Rules: use _make_/_make run_ for running it normally, _make debug_ for resetting the ASM file and then running.
