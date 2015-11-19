@@ -2,6 +2,7 @@ JFLAGS = -cp *:.
 JVM = java
 JC = javac
 DATE = `date +%d-%m-%y::%H-%M-%S_%p`
+COORD = coords.json
 
 .SUFFIXES: .java .class
 
@@ -20,7 +21,11 @@ default: run
 classes: $(CLASSES:.java=.class)
 
 #compiles and runs Preprocess
-run: classes
+run:
+ifneq ($(COORD), coords.json)
+	cp -f $(COORD) coords.json
+endif
+	$(MAKE) classes
 	$(JVM) $(JFLAGS) $(MAIN)
 
 #resets the ASM file, runs
@@ -31,6 +36,8 @@ debug:
 #resets ASM, removes extra files
 clean:
 		cp -f ../ASM/move_to_points-duplicate.ASM ../ASM/move_to_points.ASM
+		$(RM) ../target/move_to_points.ASM
+		$(RM) ../target/packed/*
 		$(RM) *.class
 		$(RM) BruteSquad.tar
 
