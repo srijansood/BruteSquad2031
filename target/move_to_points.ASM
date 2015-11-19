@@ -128,8 +128,8 @@ Main: ; "Real" program starts here.
 		ADDI 1
 		STORE TABLE_POINTER
 		
-		;LOAD 4
-		;OUT BEEP
+		LOAD 4
+		OUT BEEP
 		
 		LOAD POINTER_ADD_AMT	;used to keep track of how many points we have loaded out of table so we know when to stop the loop and die
 		ADDI 3
