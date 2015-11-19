@@ -26,19 +26,21 @@ public class AssemblyWriter {
     /**
      * Initializes global variables
      */
-    public void initialize() {
+    public Coordinate[] initialize() {
         System.out.println("---Initialize Begin---");
+        System.out.println("ASM file: " + ASMFILE);
         for (int i = 0; i < inCoords.length; i++)
             inCoords[i] = new Coordinate();
         for (int i = 0; i < outCoords.length; i++)
             outCoords[i] = new Coordinate();
         System.out.println("---Initialize End---");
+        return outCoords;
     }
 
     /**
      * Reads JSON file and populate Coordinate arrays
      */
-    public static void populate() throws FileNotFoundException, IOException, ParseException {
+    public static Coordinate[] populate() throws FileNotFoundException, IOException, ParseException {
         System.out.println("---populate Begin---");
         JSONParser parser = new JSONParser();
 		JSONObject jsonObject = (JSONObject) parser.parse(new FileReader(new File("").getAbsoluteFile().getParent() + "/Pre/coords.json"));
@@ -50,6 +52,7 @@ public class AssemblyWriter {
             System.out.printf("%d. Num: %d x: %d y: %d\n", i, inCoords[i].getNumber(), inCoords[i].getX(),  inCoords[i].getY());
         }
         System.out.println("---populate End---");
+        return inCoords;
     }
 
     /**
@@ -89,22 +92,8 @@ public class AssemblyWriter {
         System.out.println("---writeToASM End---");
     }
 
-    /**
-     * Uses graph traversal algorithms to decide the optimal ordering of points
-     */
-    public static void magic() {
-        System.out.println("---Magic Begin---");
-        outCoords = Arrays.copyOf(inCoords, inCoords.length);
-        System.out.println("---Magic End---");
+    public static int toRobotUnits(int feetValue) {
+        return 0;
     }
 
-    public static void main(String[] args) throws Exception {
-        System.out.println("---Main Begin---");
-        System.out.println("Assembly File - " + ASMFILE);
-        new AssemblyWriter().initialize();
-        populate();
-        magic();
-        writeToASM();
-        System.out.println("---Main End---");
-    }
 }
