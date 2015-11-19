@@ -28,7 +28,7 @@ ORG        &H000       ; Jump table is located in mem 0-4
 	JUMP   CTimer_ISR  ; Timer interrupt
 	RETI               ; UART interrupt (unused)
 	RETI               ; Motor stall interrupt (unused)
-
+	
 ;***************************************************************
 ;* Initialization
 ;***************************************************************
@@ -40,7 +40,7 @@ Init:
 	OUT    RVELCMD
 	OUT    SONAREN     ; Disable sonar (optional)
 	OUT    BEEP        ; Stop any beeping
-
+	
 	CALL   SetupI2C    ; Configure the I2C to read the battery voltage
 	CALL   BattCheck   ; Get battery voltage (and end if too low).
 	OUT    LCD         ; Display batt voltage on LCD
@@ -55,7 +55,7 @@ WaitForSafety:
 	SHIFT  8           ; Shift over to LED17
 	OUT    XLEDS       ; LED17 blinks at 2.5Hz (10Hz/4)
 	JUMP   WaitForSafety
-
+	
 WaitForUser:
 	; Wait for user to press PB3
 	IN     TIMER       ; We'll blink the LEDs above PB3
@@ -71,7 +71,7 @@ WaitForUser:
 	LOAD   Zero
 	OUT    XLEDS       ; clear LEDs once ready to continue
 	JUMP   Main
-
+	
 ;***************************************************************
 ;* Main code
 ;***************************************************************
@@ -83,68 +83,67 @@ Main: ; "Real" program starts here.
 
 	LOADI COORDINATE_TABLE ;load  AC with address of the COORDINATE_TABLE
 	STORE TABLE_POINTER      ; now the address of the COORDINATE_TABLE is stored in a mem address
-
+	
 	LOAD Zero ;reset table pointer
 	STORE POINTER_ADD_AMT
-
+	
 	MOVEMENT_LOOP:
 		ILOAD TABLE_POINTER	;load the index of the COORDINATE_TABLE pointed to by the TABLE_POINTER
 		STORE ROTATE_DESIRED_X  ;load and store x of goal coordinate
-
+		
 		LOAD TABLE_POINTER ;increment TABLE_POINTER
 		ADDI 1
-		STORE TABLE_POINTER
-
+		STORE TABLE_POINTER 
+		
 		ILOAD TABLE_POINTER
 		STORE ROTATE_DESIRED_Y ;load and store y of goal coordinate
-
+		
 		LOAD TABLE_POINTER
 		ADDI 1
 		STORE TABLE_POINTER
-
+		
 		;do the rotation / movement to the next ggoal coordinate:  (ROTATE_DESIRED_X, ROTATE_DESIRED_Y)
 		LOAD BEFORE
 		OUT SSEG1
-
+		
 		;setup rotate speed for initial rotation
 		LOAD FSlow
 		STORE F_ROTATE_SPEED
 		LOAD RSlow
 		STORE R_ROTATE_SPEED
 		LOAD Zero
-		ADDI 35
+		ADDI 45
 		STORE ROTATE_THRESHOLD
 		CALL ROTATE_TO_FACE
-
+		
 		CALL MOVE
-
+		
 		LOAD AFTER
 		OUT SSEG1
-
+		
 		ILOAD TABLE_POINTER ; load original destination number
 		CALL IndicateDest          ; send original destination number to computer log
 		OUT SSEG2
 		LOAD TABLE_POINTER
 		ADDI 1
 		STORE TABLE_POINTER
-
+		
 		;LOAD 4
 		;OUT BEEP
-
+		
 		LOAD POINTER_ADD_AMT	;used to keep track of how many points we have loaded out of table so we know when to stop the loop and die
 		ADDI 3
 		STORE POINTER_ADD_AMT
 		ADDI -36
 	JNEG MOVEMENT_LOOP
-
+	
 	CALL Die
-
+	
 	BEFORE: DW &H1010
 	AFTER: DW &H1111
-
+	
 	TABLE_POINTER: DW 0
 	POINTER_ADD_AMT: DW 0
-
 	;COORDINATE_TABLE_BEGIN
 	COORDINATE_TABLE:
 		DW -299 ; x
@@ -184,29 +183,31 @@ Main: ; "Real" program starts here.
 		DW 687 ; y
 		DW 1 ; dest #1
 	;COORDINATE_TABLE_END
-
+	
 Die:
 ; Sometimes it's useful to permanently stop execution.
 ; This will also catch the execution if it accidentally
 ; falls through from above.
-	CALL   StopLog     ; Disable position logging
 	LOAD   Zero        ; Stop everything.
 	OUT    LVELCMD
 	OUT    RVELCMD
 	OUT    SONAREN
+	CALL   Wait1         ; wait for last point to be logged
+	CALL   StopLog     ; Disable position logging
+	
 	;LOAD   DEAD        ; An indication that we are dead
-
-
+	
+	
 	;*************distance from point*****************
-
+	
 	LOOP_FOREVER: IN XPOS
 	SUB ROTATE_DESIRED_X
 	STORE L2X
-
+			
 	IN YPOS
 	SUB ROTATE_DESIRED_Y
 	STORE L2Y
-
+			
 	CALL L2Estimate
 	OUT SSEG1
 	JUMP LOOP_FOREVER
@@ -215,25 +216,33 @@ Forever:
 	JUMP   Forever     ; Do this forever.
 DEAD:      DW &HDEAD   ; Example of a "local variable"
 
-
-
-
-
+	
+	
+	
+	
 ;********
 ; MOVE - move in a direction, making small adjustments if necessary
-;*************************************
+;************************************
 MOVE:
 	; - Store X and Y offset in L2X and L2Y.
 	; - Call L2Estimate
-
+	LOAD TEST_VAL
+	OUT SSEG2
 	MOVE_LOOP:
-		;rotate if error is too great
 		CALL SETUP_CALC_ERROR
+		LOAD DIRECTION_TO_MOVE_AFTER_ROTATING
+		JPOS SKIP_FLIP
+			;flip angle b/c moving backwards
+			CALL FLIP_ANGLE
+			STORE DESIRED_ANGLE
+		SKIP_FLIP:
 		CALL CALC_ERROR
+		STORE ERROR
 		CALL ABS
-		ADDI -35 ;see if current angle is >= -35 degrees off
+		ADDI -80 ;see if current angle is >= -80 degrees off
 		JNEG AFTER_ROTATION_ADJUSTMENT
-			; if (angle error is too great, make a rotation to adjust before continuing movement
+		;rotate if error is too great	
+			; if (angle error is too great, make an in-place rotation to adjust before continuing movement
 			LOAD Zero
 			OUT LVELCMD
 			OUT RVELCMD
@@ -242,56 +251,83 @@ MOVE:
 			LOAD RSlow
 			STORE R_ROTATE_SPEED
 			LOAD Zero
-			ADDI 25
+			ADDI 45
 			STORE ROTATE_THRESHOLD
 			CALL ROTATE_TO_FACE
-
+		
 		AFTER_ROTATION_ADJUSTMENT:
 			;determine which direction to move
 			;forward is positive, backward is negative
-			LOAD DIRECTION_TO_MOVE_AFTER_ROTATING
-			JNEG MOVE_BACKWARD
-				;move forward
-				LOAD FMid
+		LOAD DIRECTION_TO_MOVE_AFTER_ROTATING
+		JNEG MOVE_BACKWARD
+			;move forward
+			LOAD ERROR ;negative = rotate right, positive = rotate left
+			JNEG F_SLIGHT_RIGHT
+			    ;slight rotation to left
+				LOAD FSlow
 				OUT LVELCMD
+				ADDI 150
 				OUT RVELCMD
 				JUMP END_OF_MOVEMENT_CASES
-			MOVE_BACKWARD:
-				LOAD RMid
-				OUT LVELCMD
+			F_SLIGHT_RIGHT:
+				; slight rotation to right
+				LOAD FSlow
 				OUT RVELCMD
-			END_OF_MOVEMENT_CASES:
-				IN XPOS
-				SUB ROTATE_DESIRED_X
-				STORE L2X
-
-				IN YPOS
-				SUB ROTATE_DESIRED_Y
-				STORE L2Y
-
-				CALL L2Estimate
-				STORE DISTANCE_TO_MOVE
-				OUT SSEG1
-				ADDI -140 ;see if distance is within 140 of zero (140 ~= 6 inches)
+				ADDI 150
+				OUT LVELCMD
+			JUMP END_OF_MOVEMENT_CASES
+			
+			
+		MOVE_BACKWARD:
+			LOAD ERROR ;negative = rotate left, positive = rotate right
+			JNEG B_SLIGHT_RIGHT
+			    ;slight rotation to left
+				LOAD RSlow
+				OUT RVELCMD
+				ADDI -150
+				OUT LVELCMD
+				JUMP END_OF_MOVEMENT_CASES
+			B_SLIGHT_RIGHT:
+				; slight rotation to right
+				LOAD RSlow
+				OUT LVELCMD
+				ADDI -150
+				OUT RVELCMD
+				
+			JUMP END_OF_MOVEMENT_CASES
+			
+		END_OF_MOVEMENT_CASES:
+			IN XPOS
+			SUB ROTATE_DESIRED_X
+			STORE L2X
+			
+			IN YPOS
+			SUB ROTATE_DESIRED_Y
+			STORE L2Y
+			
+			CALL L2Estimate
+			STORE DISTANCE_TO_MOVE
+			OUT SSEG1
+			ADDI -130 ;see if distance is within 130 of zero (130 < 6 inches)
 	JPOS MOVE_LOOP
-
+	
 	LOAD Zero
 	OUT LVELCMD
 	OUT RVELCMD
-RETURN
-
-
-
-
-
+RETURN	
+	
+	
+	
+	
+	
 DISTANCE_TO_MOVE: DW &H0000
+	
 
-
-
-
+	
+	
 
 TEST_VAL: DW &H0011
-
+	
 ROTATE_DIRECTION: DW &H0000
 RIGHT: DW -1
 LEFT: DW 1
@@ -310,10 +346,10 @@ ROTATE_THRESHOLD: DW &H0000
 ROTATE_TO_FACE:
 	LOAD Zero ;debug
 	OUT SSEG2
-
+	
 	LOAD FORWARD ;default direciton to move after rotating
 	STORE DIRECTION_TO_MOVE_AFTER_ROTATING
-
+	
 	CALL SETUP_CALC_ERROR
 	CALL CALC_ERROR
 	STORE ERROR  ;save result for later so we know which direction to rotate
@@ -325,9 +361,9 @@ ROTATE_TO_FACE:
 		JUMP ROTATE_STORE_0
 	RIGHT_ROTATE:
 		LOAD RIGHT
-	ROTATE_STORE_0:
+	ROTATE_STORE_0: 
 		STORE ROTATE_DIRECTION
-
+	
 	LOAD ERROR
 	CALL Abs	; Abs(error between current angle and desired angle)
 	ADDI -90
@@ -338,32 +374,19 @@ ROTATE_TO_FACE:
 			JUMP ROTATE_STORE_1
 		LEFT_ROTATE:
 			LOAD LEFT
-		ROTATE_STORE_1:
+		ROTATE_STORE_1: 
 			STORE ROTATE_DIRECTION
 		;*********************** FLIP DA DESIRED ANGLE WE GONA GO BACKWARDS after rotating
 		LOAD BACKWARD ;so we know which way to move towards target after rotating
 		STORE DIRECTION_TO_MOVE_AFTER_ROTATING
-
-
-		LOAD DESIRED_ANGLE ; else, flip the desired angle, flip the direction
-		ADDI -180 ; if desired_angle is in first or second quadrant (0 - 179 degrees)
-		JNEG FIRST2QUADRANTS
-		; else, desired_angle is in 2nd
-			; flip case for second two quadrants
-			LOAD DESIRED_ANGLE
-			ADDI -180
-			JUMP END_OF_ANGLE_FLIPPING
-
-		FIRST2QUADRANTS:
-			LOAD DESIRED_ANGLE
-			ADDI 180
-
-		END_OF_ANGLE_FLIPPING:
+		
+		
+		CALL FLIP_ANGLE
 			STORE DESIRED_ANGLE ;update desired angle with flipped version since we are going backwards now
 			;CALL CALC_ERROR ; calculate new error, since we will have to rotate a different amount than if we were going forwards
 			;STORE ERROR   ; store error to be used as a parameter for rotateTo
-
-
+			
+	
 	ROTATE_LOOP:  ;now rotate to desired angle
 		;LOAD ERROR ;rotate right if error is negative, left if error is positive
 		LOAD ROTATE_DIRECTION
@@ -379,18 +402,18 @@ ROTATE_TO_FACE:
 			OUT LVELCMD
 			LOAD R_ROTATE_SPEED
 			OUT RVELCMD
-
+		
 		ROTATE_MIDDLE: ; the part where we decide if we should stop
 			IN THETA
 			SUB DESIRED_ANGLE
 			;STORE ROTATE_ERROR
-
-			;LOAD ROTATE_DIRECTION ;negative = right, positive = right
+			
+			;LOAD ROTATE_DIRECTION ;negative = right, positive = left
 			CALL Abs
 			SUB ROTATE_THRESHOLD
 			JNEG END_OF_ROTATION  ; if abs(current angle - desired angle) < some amt, stop rotating (robot will continue to spin under its rotational momentum
 			JUMP ROTATE_LOOP
-
+	
 	END_OF_ROTATION:
 		LOAD Zero
 		OUT LVELCMD
@@ -399,11 +422,29 @@ ROTATE_TO_FACE:
 
 ROTATE_ERROR: DW &H0000
 
+;****************************************
+;   FLIP ANGLE
+;****************************************
+FLIP_ANGLE:
+	LOAD DESIRED_ANGLE ; else, flip the desired angle, flip the direction
+		ADDI -180 ; if desired_angle is in first or second quadrant (0 - 179 degrees)
+		JNEG FIRST2QUADRANTS
+		; else, desired_angle is in 2nd
+			; flip case for second two quadrants
+			LOAD DESIRED_ANGLE
+			ADDI -180
+			JUMP END_OF_ANGLE_FLIPPING
+			
+		FIRST2QUADRANTS:
+			LOAD DESIRED_ANGLE
+			ADDI 180
+		
+		END_OF_ANGLE_FLIPPING: RETURN
 ;*******************************************************************************
 ; Mod360: modulo 360
 ; Returns AC%180 in AC
 ; Modified from Mod180 by Kevin Johnson.  No licence or copyright applied.
-;*******************************************************************************
+;*******************************************************************************	
 Mod360:
 	JNEG   Mod360n      ; handle negatives
 Mod360p:
@@ -419,24 +460,22 @@ Mod360n:
 
 ;*************************************************************************
 ; SETUP_CALC_ERROR
-; calculates desired angle (DESIRED_ANGLE)
+; calculates desired angle (modifies DESIRED_ANGLE)
 ;*************************************************************************
 SETUP_CALC_ERROR:
-	IN THETA ;get current robot angle and store it for CALC_ERROR
-	STORE THETA_STORAGE
 	IN XPOS ; find delta x
 	STORE X_POS_STORED
 	;SUB ROTATE_DESIRED_X
 	LOAD ROTATE_DESIRED_X
 	SUB X_POS_STORED
 	STORE X_DIFF
-
+	
 	IN YPOS ;find delta y
 	STORE Y_POS_STORED
 	LOAD ROTATE_DESIRED_Y
 	SUB Y_POS_STORED
 	STORE Y_DIFF
-
+	
 	; get desired angle
 		; store params for ATAN
 	LOAD X_DIFF
@@ -452,8 +491,10 @@ RETURN
 ;
 ;                                 Kevin's error formula: error = (desired - actual + 180)%360 - 180
 ; **********************************************************************
-
+	
 CALC_ERROR:
+	IN THETA ;get current robot angle and store it for CALC_ERROR
+	STORE THETA_STORAGE
 	LOAD DESIRED_ANGLE
 	SUB THETA_STORAGE ;desired - actual
 	ADDI 180                        ;desired - actual + 180
@@ -483,12 +524,12 @@ ERROR:          DW   &H0000
 
 
 
-
+	
 ;***************************************************************
 ;* Subroutines
 ;***************************************************************
 
-; Subroutine to wait (block) for 1 second
+; Subroutine to  (block) for 1 second
 Wait1:
 	OUT    TIMER
 Wloop:
@@ -507,7 +548,7 @@ WACLoop:
 	JNEG   WACLoop
 	RETURN
 	WaitTime: DW 0     ; "local" variable.
-
+	
 ; This subroutine will get the battery voltage,
 ; and stop program execution if it is too low.
 ; SetupI2C must be executed prior to this.
@@ -539,7 +580,7 @@ DeadBatt:
 	OUT    XLEDS
 	CALL   Wait1       ; 1 second
 	JUMP   DeadBatt    ; repeat forever
-
+	
 ; Subroutine to read the A/D (battery voltage)
 ; Assumes that SetupI2C has been run
 GetBattLvl:
@@ -561,7 +602,7 @@ SetupI2C:
 	OUT    I2C_RDY     ; start the communication
 	CALL   BlockI2C    ; wait for it to finish
 	RETURN
-
+	
 ; Subroutine to block until I2C device is idle
 BlockI2C:
 	LOAD   Zero
@@ -653,7 +694,7 @@ IndicateDest:
 	RETURN
 	IDNumber: DW 0
 	IDFlag: DW 0
-
+	
 
 ; Timer interrupt, used to send position data to the server
 CTimer_ISR:
@@ -730,10 +771,10 @@ A2_R1n: ; region 1 negative
 	ADDI   360          ; Add 360 if we are in octant 8
 	RETURN
 A2_R3: ; region 3
-	CALL   A2_calc      ; Octants 4, 5
+	CALL   A2_calc      ; Octants 4, 5            
 	ADDI   180          ; theta' = theta + 180
 	RETURN
-A2_sw: ; switch arguments; octants 2, 3, 6, 7
+A2_sw: ; switch arguments; octants 2, 3, 6, 7 
 	LOAD   AtanY        ; Swap input arguments
 	STORE  AtanT
 	LOAD   AtanX
@@ -846,10 +887,10 @@ Mult16s:
 	STORE  mres16sH     ; clear result
 	LOADI  16           ; load 16 to counter
 Mult16s_loop:
-	STORE  mcnt16s
+	STORE  mcnt16s      
 	LOAD   m16sc        ; check the carry (from previous iteration)
 	JZERO  Mult16s_noc  ; if no carry, move on
-	LOAD   mres16sH     ; if a carry,
+	LOAD   mres16sH     ; if a carry, 
 	ADD    m16sA        ;  add multiplicand to result H
 	STORE  mres16sH
 Mult16s_noc: ; no carry
@@ -950,7 +991,7 @@ Div16s_neg:
 	XOR    NegOne
 	ADDI   1
 	STORE  dres16sQ
-	RETURN
+	RETURN	
 d16sN: DW 0 ; numerator
 d16sD: DW 0 ; denominator
 d16sS: DW 0 ; sign value
@@ -976,7 +1017,7 @@ Abs_r:
 ; Mod180: modulo 180
 ; Returns AC%180 in AC
 ; Written by Kevin Johnson.  No licence or copyright applied.
-;*******************************************************************************
+;*******************************************************************************	
 Mod180:
 	JNEG   Mod180n      ; handle negatives
 Mod180p:
@@ -989,7 +1030,7 @@ Mod180n:
 	JNEG   Mod180n
 	ADDI   -180         ; go back negative
 	RETURN
-
+	
 ;*******************************************************************************
 ; L2Estimate:  Pythagorean distance estimation
 ; Written by Kevin Johnson.  No licence or copyright applied.
@@ -1054,7 +1095,7 @@ L2Y:  DW 0
 L2T1: DW 0
 L2T2: DW 0
 L2T3: DW 0
-
+	
 ;***************************************************************
 ;* Variables
 ;***************************************************************
