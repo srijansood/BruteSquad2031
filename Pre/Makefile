@@ -23,6 +23,7 @@ run: classes
 	$(RM) *.class
 
 debug: run
+	   cp -f ../ASM/move_to_points-duplicate.ASM ../ASM/move_to_points.ASM
 
 clean:
 		$(RM) *.class
