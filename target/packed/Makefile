@@ -3,6 +3,7 @@ JVM = java
 JC = javac
 DATE = `date +%d-%m-%y::%H-%M-%S_%p`
 
+
 .SUFFIXES: .java .class
 
 .java.class:
@@ -20,7 +21,9 @@ default: run
 classes: $(CLASSES:.java=.class)
 
 #compiles and runs Preprocess
-run: classes
+run:
+	cp -f ${coord} coords.json
+	$(MAKE) classes
 	$(JVM) $(JFLAGS) $(MAIN)
 
 #resets the ASM file, runs
