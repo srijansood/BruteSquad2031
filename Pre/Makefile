@@ -22,8 +22,10 @@ run: classes
 	$(JVM) $(JFLAGS) $(MAIN)
 	$(RM) *.class
 
-debug: run
-	   cp -f ../ASM/move_to_points-duplicate.ASM ../ASM/move_to_points.ASM
+debug:
+		cp -f ../ASM/move_to_points-duplicate.ASM ../ASM/move_to_points.ASM
+		$(MAKE) run
+
 
 clean:
 		$(RM) *.class
