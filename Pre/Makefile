@@ -29,6 +29,7 @@ debug:
 
 clean:
 		$(RM) *.class
+		$(RM) BruteSquad.tar
 
 pack: clean
-	tar zcvf BruteSquad.tar $(CLASSES)
+	tar zcvf BruteSquad.tar *
