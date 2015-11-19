@@ -35,7 +35,11 @@ clean:
 
 #packs the code in a tar
 pack:
-	tar zcvf BruteSquad.zip *
+	cp -f ../ASM/move_to_points.ASM ../target/move_to_points.ASM
+	cp -rf * ../target/packed/
+	git add ../target/
+	git commit -m "Packed at "+%T
+	git push
 
 lab: run
 	$(MAKE) pack
