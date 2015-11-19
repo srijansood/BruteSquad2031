@@ -9,8 +9,8 @@ import java.util.Collections;
  * should visit them
  */
 public class Preprocess {
-    private static Coordinate[] inCoords = new Coordinate[13];
-    private static Coordinate[] outCoords  = new Coordinate[13];
+    private static Coordinate[] inCoords = new Coordinate[12];
+    private static Coordinate[] outCoords  = new Coordinate[12];
 
     /**
      * Uses graph traversal algorithms to decide the optimal ordering of points
