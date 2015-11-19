@@ -2,7 +2,7 @@ JFLAGS = -cp *:.
 JVM = java
 JC = javac
 DATE = `date +%d-%m-%y::%H-%M-%S_%p`
-
+COORD = coords.json
 
 .SUFFIXES: .java .class
 
@@ -22,7 +22,9 @@ classes: $(CLASSES:.java=.class)
 
 #compiles and runs Preprocess
 run:
-	cp -f ${coord} coords.json
+ifneq ($(COORD), coords.json)
+	cp -f $(COORD) coords.json
+endif
 	$(MAKE) classes
 	$(JVM) $(JFLAGS) $(MAIN)
 
