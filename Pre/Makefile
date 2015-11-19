@@ -1,6 +1,7 @@
 JFLAGS = -cp *:.
 JVM = java
 JC = javac
+DATE = `date +%d-%m-%y::%H-%M-%S_%p`
 
 .SUFFIXES: .java .class
 
@@ -38,7 +39,7 @@ pack:
 	cp -f ../ASM/move_to_points.ASM ../target/move_to_points.ASM
 	cp -rf * ../target/packed/
 	git add ../target/
-	git commit -m "Packed at "+%T
+	git commit -m "Packed at "$(DATE)
 	git push
 
 lab: run
