@@ -12,4 +12,4 @@ TO-DO:
 - have preprocessing program convert take in 12 (x,y) integer coordinates in feet and convert them to robot units and place them in mif file
 	* robot units = inches * 25.4 / 1.05
 	
-Note - To compile and run pre-processing code use _javac -cp *:. *.java_ (to add JARs to classpath)
+Note - To compile and run pre-processing code use Makefile (_make_) or  _javac -cp *:. *.java_ (to add JARs to classpath) 
