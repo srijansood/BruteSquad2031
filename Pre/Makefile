@@ -18,18 +18,22 @@ default: run
 
 classes: $(CLASSES:.java=.class)
 
+#compiles and runs Preprocess
 run: classes
 	$(JVM) $(JFLAGS) $(MAIN)
 	$(RM) *.class
 
+#resets the ASM file, runs
 debug:
 		cp -f ../ASM/move_to_points-duplicate.ASM ../ASM/move_to_points.ASM
 		$(MAKE) run
 
-
+#resets ASM, removes extra files
 clean:
+		cp -f ../ASM/move_to_points-duplicate.ASM ../ASM/move_to_points.ASM
 		$(RM) *.class
 		$(RM) BruteSquad.tar
 
+#packs the code in a tar
 pack: clean
 	tar zcvf BruteSquad.tar *
