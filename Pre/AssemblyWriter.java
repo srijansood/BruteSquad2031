@@ -46,8 +46,8 @@ public class AssemblyWriter {
 		JSONObject jsonObject = (JSONObject) parser.parse(new FileReader(new File("").getAbsoluteFile().getParent() + "/Pre/coords.json"));
         for (int i = 0; i < inCoords.length; i++) {
             JSONArray r = (JSONArray) jsonObject.get(Integer.toString(i + 1));
-            inCoords[i].x = Integer.valueOf((int) (long) r.get(0));
-            inCoords[i].y = Integer.valueOf((int) (long) r.get(1));
+            inCoords[i].x = toRobotUnits(((Number) r.get(0)).doubleValue());
+            inCoords[i].y = toRobotUnits(((Number) r.get(1)).doubleValue());
             inCoords[i].setNumber(i + 1);
             System.out.printf("%d. Num: %d x: %d y: %d\n", i, inCoords[i].getNumber(), inCoords[i].getX(),  inCoords[i].getY());
         }
@@ -97,8 +97,8 @@ public class AssemblyWriter {
         System.out.println("---writeToASM End---");
     }
 
-    public static int toRobotUnits(int feetValue) {
-        return 0;
+    public static int toRobotUnits(Double feetValue) {
+        return (int) ((feetValue * 12 * 25.4d) / (1.05d));
     }
 
 }
