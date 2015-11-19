@@ -145,43 +145,43 @@ Main: ; "Real" program starts here.
 	TABLE_POINTER: DW 0
 	POINTER_ADD_AMT: DW 0
 	;COORDINATE_TABLE_BEGIN
-	COORDINATE_TABLE: ; PREPROCESSING WILL POPULATE THIS TABLE with cooordinates and their original corresponding destination number
-		DW 200 ;first coordinate x
-		DW 200  ;first coordinate y
-		DW 12    ; number of original destination at this coordinate (we will be given destinations 1-12 and they will likely end up out of order in the robot)
-		DW -200 ; second coordinate x
-		DW 200 ; second coordinate y
-		DW 11   ; # of original destination
-		DW -200 ;coord 2 x
-		DW -200  ;coord 2 y
-		DW 10  ; # of original destination
-		DW 200 ; coord 3 x
-		DW -200 ; coord 3 y
-		DW 8   ; # of original destination
-		DW 300 ; coord 4 x
-		DW 300  ;coord 4 y
-		DW 6     ; # of original destination
-		DW -400 ; coord 5 x
-		DW -400 ; coord 5 y
-		DW 5     ; # of original destination
-		DW -500 ;coord 6 x
-		DW 400 ;coord 6 y
-		DW 9     ; # of original destination
-		DW 200 ; coord 7 x
-		DW 300 ; coord 7 y
-		DW 7    ; # of original destination
-		DW 800 ;coord 8 x
-		DW -500  ;coord 8 y
-		DW 4    ; # of original destination
-		DW 200 ; coord 9 x
-		DW 400 ; coord 9 y
-		DW 3    ; #  of original destination
-		DW 350 ; coord 10 x
-		DW -300  ;coord 10 y
-		DW 2    ; # of original destination
-		DW -300 ; coord 11 x
-		DW 800 ; coord 11 y
-		DW 1   ; # of original destination
+	COORDINATE_TABLE:
+		DW -1161 ; x
+		DW -580 ; y
+		DW 12 ; dest #12
+		DW 870 ; x
+		DW -870 ; y
+		DW 11 ; dest #11
+		DW -580 ; x
+		DW 1161 ; y
+		DW 10 ; dest #10
+		DW 580 ; x
+		DW 1451 ; y
+		DW 9 ; dest #9
+		DW 580 ; x
+		DW -870 ; y
+		DW 8 ; dest #8
+		DW -870 ; x
+		DW 580 ; y
+		DW 7 ; dest #7
+		DW 0 ; x
+		DW -1451 ; y
+		DW 6 ; dest #6
+		DW -580 ; x
+		DW -1161 ; y
+		DW 5 ; dest #5
+		DW 290 ; x
+		DW 1161 ; y
+		DW 4 ; dest #4
+		DW -870 ; x
+		DW -290 ; y
+		DW 3 ; dest #3
+		DW 870 ; x
+		DW -580 ; y
+		DW 2 ; dest #2
+		DW -1161 ; x
+		DW 290 ; y
+		DW 1 ; dest #1
 	;COORDINATE_TABLE_END
 	
 Die:
@@ -264,14 +264,14 @@ MOVE:
 			LOAD ERROR ;negative = rotate right, positive = rotate left
 			JNEG F_SLIGHT_RIGHT
 			    ;slight rotation to left
-				LOAD FSlow
+				LOAD FMidLow
 				OUT LVELCMD
 				ADDI 150
 				OUT RVELCMD
 				JUMP END_OF_MOVEMENT_CASES
 			F_SLIGHT_RIGHT:
 				; slight rotation to right
-				LOAD FSlow
+				LOAD FMidLow
 				OUT RVELCMD
 				ADDI 150
 				OUT LVELCMD
@@ -282,14 +282,14 @@ MOVE:
 			LOAD ERROR ;negative = rotate left, positive = rotate right
 			JNEG B_SLIGHT_RIGHT
 			    ;slight rotation to left
-				LOAD RSlow
+				LOAD RMidLow
 				OUT RVELCMD
 				ADDI -150
 				OUT LVELCMD
 				JUMP END_OF_MOVEMENT_CASES
 			B_SLIGHT_RIGHT:
 				; slight rotation to right
-				LOAD RSlow
+				LOAD RMidLow
 				OUT LVELCMD
 				ADDI -150
 				OUT RVELCMD
@@ -308,7 +308,7 @@ MOVE:
 			CALL L2Estimate
 			STORE DISTANCE_TO_MOVE
 			OUT SSEG1
-			ADDI -130 ;see if distance is within 130 of zero (130 < 6 inches)
+			ADDI -85 ;see if distance is within # of zero (# < 6 inches)
 	JPOS MOVE_LOOP
 	
 	LOAD Zero
@@ -331,8 +331,8 @@ TEST_VAL: DW &H0011
 ROTATE_DIRECTION: DW &H0000
 RIGHT: DW -1
 LEFT: DW 1
-RMidLow: DW -200
-FMidLow: DW 200
+RMidLow: DW -250
+FMidLow: DW 250
 
 F_ROTATE_SPEED: DW &H0000 ; speed of the wheel whichi s spinning forward while rotating
 R_ROTATE_SPEED: DW &H0000 ; speed of thew heelw hich is spinning back while rotating
