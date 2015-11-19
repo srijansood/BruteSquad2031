@@ -36,6 +36,8 @@ debug:
 #resets ASM, removes extra files
 clean:
 		cp -f ../ASM/move_to_points-duplicate.ASM ../ASM/move_to_points.ASM
+		$(RM) ../target/move_to_points.ASM
+		$(RM) ../target/packed/*
 		$(RM) *.class
 		$(RM) BruteSquad.tar
 
