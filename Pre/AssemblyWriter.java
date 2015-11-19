@@ -97,6 +97,9 @@ public class AssemblyWriter {
         System.out.println("---writeToASM End---");
     }
 
+    /**
+     * Converts feet values to robot units
+     */
     public static int toRobotUnits(Double feetValue) {
         return (int) ((feetValue * 12 * 25.4d) / (1.05d));
     }
