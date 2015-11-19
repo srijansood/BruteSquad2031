@@ -144,6 +144,7 @@ Main: ; "Real" program starts here.
 	
 	TABLE_POINTER: DW 0
 	POINTER_ADD_AMT: DW 0
+	;COORDINATE_TABLE_BEGIN
 	COORDINATE_TABLE: ; PREPROCESSING WILL POPULATE THIS TABLE with cooordinates and their original corresponding destination number
 		DW 200 ;first coordinate x
 		DW 200  ;first coordinate y
@@ -181,16 +182,19 @@ Main: ; "Real" program starts here.
 		DW -300 ; coord 11 x
 		DW 800 ; coord 11 y
 		DW 1   ; # of original destination
+	;COORDINATE_TABLE_END
 	
 Die:
 ; Sometimes it's useful to permanently stop execution.
 ; This will also catch the execution if it accidentally
 ; falls through from above.
-	CALL   StopLog     ; Disable position logging
 	LOAD   Zero        ; Stop everything.
 	OUT    LVELCMD
 	OUT    RVELCMD
 	OUT    SONAREN
+	CALL   Wait1         ; wait for last point to be logged
+	CALL   StopLog     ; Disable position logging
+	
 	;LOAD   DEAD        ; An indication that we are dead
 	
 	
@@ -304,7 +308,7 @@ MOVE:
 			CALL L2Estimate
 			STORE DISTANCE_TO_MOVE
 			OUT SSEG1
-			ADDI -140 ;see if distance is within 140 of zero (140 ~= 6 inches)
+			ADDI -130 ;see if distance is within 130 of zero (130 < 6 inches)
 	JPOS MOVE_LOOP
 	
 	LOAD Zero
@@ -525,7 +529,7 @@ ERROR:          DW   &H0000
 ;* Subroutines
 ;***************************************************************
 
-; Subroutine to wait (block) for 1 second
+; Subroutine to  (block) for 1 second
 Wait1:
 	OUT    TIMER
 Wloop:
