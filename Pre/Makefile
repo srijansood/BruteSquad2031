@@ -21,7 +21,6 @@ classes: $(CLASSES:.java=.class)
 #compiles and runs Preprocess
 run: classes
 	$(JVM) $(JFLAGS) $(MAIN)
-	$(RM) *.class
 
 #resets the ASM file, runs
 debug:
@@ -35,5 +34,8 @@ clean:
 		$(RM) BruteSquad.tar
 
 #packs the code in a tar
-pack: clean
-	tar zcvf BruteSquad.tar *
+pack:
+	tar zcvf BruteSquad.zip *
+
+lab: run
+	$(MAKE) pack
