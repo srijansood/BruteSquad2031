@@ -1,4 +1,5 @@
 import java.util.Arrays;
+import java.util.Collections;
 
 /**
  * Serves as a helper class for the
@@ -17,6 +18,11 @@ public class Preprocess {
     public static void magic() {
         System.out.println("---Magic Begin---");
         outCoords = Arrays.copyOf(inCoords, inCoords.length);
+
+        //TODO - Replace with algorithm
+        Collections.reverse(Arrays.asList(outCoords));
+
+        System.out.println("outCoords: " + Arrays.toString(outCoords));
         System.out.println("---Magic End---");
     }
 
@@ -24,8 +30,9 @@ public class Preprocess {
         System.out.println("---Main Begin---");
         outCoords = new AssemblyWriter().initialize();
         inCoords = AssemblyWriter.populate();
+        System.out.println("inCoords: " + Arrays.toString(inCoords));
         magic();
-        AssemblyWriter.writeToASM();
+        AssemblyWriter.writeToASM(outCoords);
         System.out.println("---Main End---");
     }
 }

@@ -58,8 +58,9 @@ public class AssemblyWriter {
     /**
      * Writes the modified order of coordinates back to ASM file
      */
-    public static void writeToASM() throws FileNotFoundException, IOException {
+    public static void writeToASM(Coordinate[] toWrite) throws FileNotFoundException, IOException {
         System.out.println("---writeToASM Begin---");
+        outCoords = toWrite;
         BufferedReader reader = new BufferedReader(new FileReader(ASMFILE));
         String line;
         ArrayList<String> out = new ArrayList<>();
