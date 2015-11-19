@@ -128,8 +128,8 @@ Main: ; "Real" program starts here.
 		ADDI 1
 		STORE TABLE_POINTER
 		
-		;LOAD 4
-		;OUT BEEP
+		LOAD 4
+		OUT BEEP
 		
 		LOAD POINTER_ADD_AMT	;used to keep track of how many points we have loaded out of table so we know when to stop the loop and die
 		ADDI 3
@@ -146,41 +146,41 @@ Main: ; "Real" program starts here.
 	POINTER_ADD_AMT: DW 0
 	;COORDINATE_TABLE_BEGIN
 	COORDINATE_TABLE:
-		DW -1161 ; x
+		DW 870 ; x
 		DW -580 ; y
 		DW 12 ; dest #12
 		DW 870 ; x
 		DW -870 ; y
 		DW 11 ; dest #11
-		DW -580 ; x
-		DW 1161 ; y
-		DW 10 ; dest #10
-		DW 580 ; x
-		DW 1451 ; y
-		DW 9 ; dest #9
 		DW 580 ; x
 		DW -870 ; y
-		DW 8 ; dest #8
-		DW -870 ; x
-		DW 580 ; y
-		DW 7 ; dest #7
+		DW 10 ; dest #10
 		DW 0 ; x
 		DW -1451 ; y
-		DW 6 ; dest #6
+		DW 9 ; dest #9
 		DW -580 ; x
 		DW -1161 ; y
-		DW 5 ; dest #5
-		DW 290 ; x
-		DW 1161 ; y
-		DW 4 ; dest #4
+		DW 8 ; dest #8
+		DW -1161 ; x
+		DW -580 ; y
+		DW 7 ; dest #7
 		DW -870 ; x
 		DW -290 ; y
-		DW 3 ; dest #3
-		DW 870 ; x
-		DW -580 ; y
-		DW 2 ; dest #2
+		DW 6 ; dest #6
 		DW -1161 ; x
 		DW 290 ; y
+		DW 5 ; dest #5
+		DW -870 ; x
+		DW 580 ; y
+		DW 4 ; dest #4
+		DW -580 ; x
+		DW 1161 ; y
+		DW 3 ; dest #3
+		DW 290 ; x
+		DW 1161 ; y
+		DW 2 ; dest #2
+		DW 580 ; x
+		DW 1451 ; y
 		DW 1 ; dest #1
 	;COORDINATE_TABLE_END
 	
