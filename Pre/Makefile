@@ -26,7 +26,7 @@ ifneq ($(COORD), coords.json)
 	cp -f $(COORD) coords.json
 endif
 	$(MAKE) classes
-	$(JVM) $(JFLAGS) $(MAIN)
+	$(JVM) $(JFLAGS) $(MAIN) > log.txt
 
 #resets the ASM file, runs
 debug:
