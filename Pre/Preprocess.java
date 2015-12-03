@@ -107,7 +107,6 @@ public class Preprocess {
         Preprocess p = new Preprocess();
         graph = p.createGraph();
         //p.visualize();
-
         //System.out.println("outCoords - " + Arrays.toString(outCoords));
         //p.kruskalPath(p.createGraph());
 
@@ -127,7 +126,7 @@ public class Preprocess {
             System.out.println("Using Magic!");
         }
 
-        outCoords = uselist.toArray(outCoords);
+        outCoords = uselist.subList(1, uselist.size()).toArray(outCoords);
         AssemblyWriter.writeToASM(outCoords);
         System.out.println("---Main End---\n");
     }
