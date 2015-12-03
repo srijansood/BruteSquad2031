@@ -4,56 +4,56 @@ ASM file: /home/elimonent/Documents/BruteSquad2031/ASM/move_to_points.ASM
 ---Initialize End---
 
 ---populate Begin---
-0. Num: 1 x: 199 y: 687
-1. Num: 2 x: -199 y: 199
-2. Num: 3 x: -199 y: -199
-3. Num: 4 x: 199 y: -199
-4. Num: 5 x: 299 y: 299
-5. Num: 6 x: -399 y: -399
-6. Num: 7 x: -499 y: 399
-7. Num: 8 x: 199 y: 299
-8. Num: 9 x: 799 y: -499
-9. Num: 10 x: 199 y: 399
-10. Num: 11 x: 349 y: -299
-11. Num: 12 x: -299 y: 799
+0. Num: 1 x: 580 y: 580
+1. Num: 2 x: 870 y: -1161
+2. Num: 3 x: 290 y: 1451
+3. Num: 4 x: 0 y: -580
+4. Num: 5 x: 1161 y: -580
+5. Num: 6 x: -580 y: 290
+6. Num: 7 x: 290 y: 580
+7. Num: 8 x: 0 y: 1451
+8. Num: 9 x: -580 y: -1161
+9. Num: 10 x: 870 y: -870
+10. Num: 11 x: -870 y: 290
+11. Num: 12 x: -870 y: -1161
 ---populate End---
 
 ---NN Begin---
 Path - [Num: 0 x: 0 y: 0
-, Num: 2 x: -199 y: 199
-, Num: 7 x: -499 y: 399
-, Num: 12 x: -299 y: 799
-, Num: 1 x: 199 y: 687
-, Num: 10 x: 199 y: 399
-, Num: 8 x: 199 y: 299
-, Num: 5 x: 299 y: 299
-, Num: 4 x: 199 y: -199
-, Num: 11 x: 349 y: -299
-, Num: 9 x: 799 y: -499
-, Num: 3 x: -199 y: -199
-, Num: 6 x: -399 y: -399
+, Num: 4 x: 0 y: -580
+, Num: 9 x: -580 y: -1161
+, Num: 12 x: -870 y: -1161
+, Num: 11 x: -870 y: 290
+, Num: 6 x: -580 y: 290
+, Num: 7 x: 290 y: 580
+, Num: 1 x: 580 y: 580
+, Num: 3 x: 290 y: 1451
+, Num: 8 x: 0 y: 1451
+, Num: 5 x: 1161 y: -580
+, Num: 10 x: 870 y: -870
+, Num: 2 x: 870 y: -1161
 ]
 ---NN End---
 
 ---Magic Begin---
 Path - [Num: 0 x: 0 y: 0
-, Num: 5 x: 299 y: 299
-, Num: 12 x: -299 y: 799
-, Num: 7 x: -499 y: 399
-, Num: 6 x: -399 y: -399
-, Num: 9 x: 799 y: -499
-, Num: 11 x: 349 y: -299
-, Num: 4 x: 199 y: -199
-, Num: 3 x: -199 y: -199
-, Num: 2 x: -199 y: 199
-, Num: 8 x: 199 y: 299
-, Num: 10 x: 199 y: 399
-, Num: 1 x: 199 y: 687
+, Num: 1 x: 580 y: 580
+, Num: 7 x: 290 y: 580
+, Num: 6 x: -580 y: 290
+, Num: 4 x: 0 y: -580
+, Num: 10 x: 870 y: -870
+, Num: 5 x: 1161 y: -580
+, Num: 2 x: 870 y: -1161
+, Num: 9 x: -580 y: -1161
+, Num: 12 x: -870 y: -1161
+, Num: 11 x: -870 y: 290
+, Num: 3 x: 290 y: 1451
+, Num: 8 x: 0 y: 1451
 ]
 ---Magic End---
 
-NN Path Length - 4593.255513250755
-Magic Path Length - 5923.0516805124535
+NN Path Length - 8888.269865218572
+Magic Path Length - 10172.800926969796
 Using Nearest Neighbors!
 ---writeToASM Begin---
 ---writeToASM End---
