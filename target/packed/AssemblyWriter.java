@@ -33,7 +33,7 @@ public class AssemblyWriter {
             inCoords[i] = new Coordinate();
         for (int i = 0; i < outCoords.length; i++)
             outCoords[i] = new Coordinate();
-        System.out.println("---Initialize End---");
+        System.out.println("---Initialize End---\n");
         return outCoords;
     }
 
@@ -51,7 +51,7 @@ public class AssemblyWriter {
             inCoords[i].setNumber(i + 1);
             System.out.printf("%d. Num: %d x: %d y: %d\n", i, inCoords[i].getNumber(), inCoords[i].getX(),  inCoords[i].getY());
         }
-        System.out.println("---populate End---");
+        System.out.println("---populate End---\n");
         return inCoords;
     }
 
@@ -94,7 +94,7 @@ public class AssemblyWriter {
             writer.write(s);
         writer.flush();
         writer.close();
-        System.out.println("---writeToASM End---");
+        System.out.println("---writeToASM End---\n");
     }
 
     /**

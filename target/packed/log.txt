@@ -1,0 +1,62 @@
+---Main Begin---
+---Initialize Begin---
+ASM file: /Users/Srijan/Dropbox/Studies/ECE2031/BruteSquad2031/ASM/move_to_points.ASM
+---Initialize End---
+
+---populate Begin---
+0. Num: 1 x: 0 y: 1161
+1. Num: 2 x: 1161 y: -870
+2. Num: 3 x: 290 y: 580
+3. Num: 4 x: -870 y: -870
+4. Num: 5 x: -290 y: 580
+5. Num: 6 x: -580 y: -1161
+6. Num: 7 x: 1161 y: -1161
+7. Num: 8 x: 290 y: 0
+8. Num: 9 x: -1161 y: -290
+9. Num: 10 x: -870 y: -290
+10. Num: 11 x: 580 y: 1451
+11. Num: 12 x: -580 y: 870
+---populate End---
+
+---NN Begin---
+Path - [Num: 0 x: 0 y: 0
+, Num: 8 x: 290 y: 0
+, Num: 3 x: 290 y: 580
+, Num: 5 x: -290 y: 580
+, Num: 12 x: -580 y: 870
+, Num: 1 x: 0 y: 1161
+, Num: 11 x: 580 y: 1451
+, Num: 10 x: -870 y: -290
+, Num: 9 x: -1161 y: -290
+, Num: 4 x: -870 y: -870
+, Num: 6 x: -580 y: -1161
+, Num: 7 x: 1161 y: -1161
+, Num: 2 x: 1161 y: -870
+]
+---NN End---
+
+---Magic Begin---
+Path - [Num: 0 x: 0 y: 0
+, Num: 1 x: 0 y: 1161
+, Num: 12 x: -580 y: 870
+, Num: 5 x: -290 y: 580
+, Num: 10 x: -870 y: -290
+, Num: 4 x: -870 y: -870
+, Num: 6 x: -580 y: -1161
+, Num: 9 x: -1161 y: -290
+, Num: 3 x: 290 y: 580
+, Num: 8 x: 290 y: 0
+, Num: 2 x: 1161 y: -870
+, Num: 7 x: 1161 y: -1161
+, Num: 11 x: 580 y: 1451
+]
+---Magic End---
+
+NN Path Length - 8805.967099674923
+Magic Path Length - 11773.209633902079
+Using Nearest Neighbors!
+---writeToASM Begin---
+---writeToASM End---
+
+---Main End---
+
