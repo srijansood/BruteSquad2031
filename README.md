@@ -11,3 +11,4 @@ TO-DO:
 	
 Note - To compile and run pre-processing code use Makefile
 Rules: use _make_/_make run_ for running it normally, _make debug_ for resetting the ASM file and then running.
+Use _make lab_ to perform a run, pack everything and push to git. Use the _COORD=filename.json_ to specify a json file it should use.
